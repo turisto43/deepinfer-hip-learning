@@ -11,7 +11,7 @@
 - Git、编译器和足够磁盘空间；
 - 能够安装 ROCm、PyTorch ROCm wheel、Triton 和项目依赖。
 
-Windows 可以用于阅读代码和编写文档，但当前 DeepInfer 的构建脚本以 Linux Bash 和 Linux 动态库路径为前提。
+DeepInfer 的构建脚本以 Linux Bash 和 Linux 动态库路径为前提。
 
 ## 1. 验证驱动和运行时
 
@@ -161,5 +161,5 @@ git rev-parse --show-toplevel
 - 不通过强制覆盖 gfx 目标来宣称硬件已支持；
 - 不把一套 ROCm 版本的结果外推到另一套版本；
 - 不在性能测试中混用动态频率和未知功耗状态；
-- 不提交包含内网主机名、私有模型路径或访问令牌的完整环境日志。
+- 不提交包含内网主机名、私有模型路径或其他敏感凭据的完整环境日志。
 

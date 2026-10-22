@@ -28,7 +28,7 @@ PR 状态变化很快，以上内容只描述快照时点。
 
 ## 复核命令
 
-在任意有网络和 Git 的 Linux、macOS 或 Windows Bash 环境中执行：
+在任意具备 Bash 和网络访问的环境中执行：
 
 ```bash
 git ls-remote https://github.com/deepseek-ai/DeepInfer.git \

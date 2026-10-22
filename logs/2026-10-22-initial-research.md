@@ -32,17 +32,7 @@ DeepInfer 主分支公开列出 NVIDIA SM100 和 Huawei Ascend 950 支持。固�
 
 ## 环境与命令
 
-本次只进行了阅读和公开信息核对，没有执行 HIP 实验。
-
-本地信息：
-
-```text
-OS: Windows 10.0.26200
-Python: 3.12.10
-Git: 2.54.0.1
-hipcc: not found
-rocminfo: not found
-```
+本次只进行了阅读和公开信息核对，没有执行 HIP 实验，因此不记录环境结论。
 
 上游版本通过只读 `git ls-remote` 固定，具体哈希见 [上游版本快照](../docs/reference/upstream-snapshot.md)。
 
@@ -54,7 +44,6 @@ rocminfo: not found
 
 ## 已本地验证
 
-- 当前 Windows 环境没有可调用的 `hipcc` 和 `rocminfo`。
 - Git 能读取上游 `main` 和各 PR head 的提交哈希。
 - 本地仓库已建立文档目录并保存版本快照。
 

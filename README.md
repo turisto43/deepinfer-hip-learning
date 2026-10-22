@@ -12,7 +12,7 @@
 | DeepInfer 后端架构阅读 | 进行中 | [系统地图](docs/architecture/system-map.md)、[后端接缝](docs/architecture/backend-seams.md) |
 | ROCm PR #202–#206 追踪 | 进行中 | [PR 栈笔记](docs/architecture/rocm-pr-stack.md) |
 | DeepSelect TopK 契约整理 | 进行中 | [TopK 实验档案](labs/topk/README.md) |
-| AMD/HIP 实机验证 | 未开始 | 当前设备不满足验证条件 |
+| AMD/HIP 实机验证 | 未开始 | 尚无实机结果 |
 
 ## 从哪里开始
 

@@ -45,7 +45,7 @@ outputs/
 
 - [ ] **Step 3: 写入 README**
 
-README 包含项目定位、非官方声明、当前阶段、三条阅读入口、仓库结构、最近更新、已验证边界和下一步。不得出现求职、作品集或招聘描述。
+README 包含项目定位、非官方声明、当前阶段、三条阅读入口、仓库结构、最近更新、已验证边界和下一步。
 
 - [ ] **Step 4: 写入路线图**
 
@@ -56,10 +56,10 @@ README 包含项目定位、非官方声明、当前阶段、三条阅读入口�
 Run:
 
 ```powershell
-rg -n "求职|作品集|招聘" README.md ROADMAP.md
+rg -n "^# |^## " README.md ROADMAP.md
 ```
 
-Expected: 无匹配，命令返回 1。
+Expected: 输出 README 和路线图的主要标题。
 
 ```powershell
 git add .gitignore LICENSE README.md ROADMAP.md
@@ -136,7 +136,7 @@ Expected: 架构和版本资料提交完成。
 
 - [ ] **Step 2: 建立 TopK 实验档案**
 
-`labs/topk/README.md` 定义目标与状态；`contract.md` 记录输入、输出、排序、填充、索引类型、NaN 和 stride 契约；`environment.md` 明确当前 Windows 环境未验证 HIP；`results.md` 使用表格追加未来结果。
+`labs/topk/README.md` 定义目标与状态；`contract.md` 记录输入、输出、排序、填充、索引类型、NaN 和 stride 契约；`environment.md` 只记录实际完成的 HIP 验证环境；`results.md` 使用表格追加真实结果。
 
 - [ ] **Step 3: 建立上游追踪档案**
 
@@ -222,7 +222,7 @@ Expected: `missing_links=0`。
 Run:
 
 ```powershell
-rg -n "求职|作品集|招聘|TBD|TODO|待补充|fill in" . -g "!docs/superpowers/**"
+rg -n "TBD|TODO|待补充|fill in" . -g "!docs/superpowers/**"
 ```
 
 Expected: 无匹配，命令返回 1。
@@ -241,10 +241,10 @@ Expected: 最终工作树干净，提交历史包含本计划产生的独立提�
 
 - [ ] **Step 5: 创建并推送 GitHub 仓库**
 
-先运行 `gh auth status`。如果令牌有效，则执行：
+先确认 GitHub CLI 已登录，再执行：
 
 ```powershell
 gh repo create deepinfer-hip-learning --public --source . --remote origin --push --description "中文记录 DeepInfer 架构与 HIP/ROCm 迁移学习过程"
 ```
 
-Expected: 创建公开仓库并以 `main` 推送。若令牌仍无效，停止远程发布并报告本地仓库已经完成的提交。
+Expected: 创建公开仓库并以 `main` 推送。若登录或网络仍不可用，停止远程发布并报告本地仓库已经完成的提交。
