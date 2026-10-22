@@ -15,6 +15,19 @@ values, indices = deep_select.topk(
 )
 ```
 
+## DeepInfer 中的实际调用形态
+
+DeepInfer `main@9bd9cf2` 至少包含以下形态：
+
+| 调用方 | dtype | 关键参数 | 后续处理 |
+| --- | --- | --- | --- |
+| Indexer prefill | BF16 | `return_value=False`、可变 `end`、`sorted_index=True`、输出缓冲区 | 用于 sparse attention |
+| Indexer decode | BF16 | `return_value=False`、可变 `end`、`sorted_index=True` | 逻辑索引转换为物理 KV slot |
+| Sampler force-top-k | FP32 | `sorted=False`、返回值 | 用 index 映射真实词表 ID |
+| Sampler top-logprobs | FP32 | `sorted=True`、返回值 | 返回 top token 及 logprob |
+
+Indexer 路径直接导入 `deep_select.interface.topk`，不经过 TileLang 算子分派。详细调用链见 [TopK 调用路径](../../docs/architecture/topk-call-paths.md)。
+
 ## 输入
 
 | 项目 | 契约 |

@@ -21,12 +21,15 @@
 3. [ROCm PR 栈](docs/architecture/rocm-pr-stack.md)：了解现有 #202–#206 已经覆盖什么，以及哪些地方仍需要独立验证。
 4. [环境准备](docs/environment/amd-rocm.md)：查看 ROCm 基础检查、版本记录和最小验证顺序。
 5. [TopK 实验](labs/topk/README.md)：从 DeepSelect 的输入输出契约开始准备最小实验。
-6. [学习日志](logs/README.md)：按日期查看实际阅读、命令、失败和修正。
-7. [路线图](ROADMAP.md)：查看当前阶段和下一项可验证产出。
+6. [TopK 调用路径](docs/architecture/topk-call-paths.md)：看 indexer、sampler 和 KV cache 索引如何连接。
+7. [学习日志](logs/README.md)：按日期查看实际阅读、命令、失败和修正。
+8. [路线图](ROADMAP.md)：查看当前阶段和下一项可验证产出。
 
 ## 最近更新
 
 **2026-10-22：** 固定 DeepInfer、DeepSelect 和 ROCm PR 栈的参考提交；确认官方已有 ROCm 方案，因此后续以架构阅读、复现和聚焦改进为主，不重复提出泛泛的可行性 RFC。
+
+**2026-10-22：** 完成第一篇源码主线笔记，区分 indexer prefill、indexer decode、candidate block 和 sampler 四类 TopK 调用，并确定优先验证 BF16 indexer 路径。
 
 完整时间线见 [日志索引](logs/README.md)。
 

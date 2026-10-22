@@ -15,6 +15,7 @@ DeepInfer 和 DeepSelect 都处于快速演进阶段。本仓库中的架构判�
 | DeepInfer PR #205 | `6a0c37ddad3f613b81cb4385d534ea3ccb43fa07` | MoE、EP、Engram、CP |
 | DeepInfer PR #206 | `9a0e3531f241e29b789b83fb010f485eee0efced` | ROCm 文档和端到端结果 |
 | DeepSelect `main` | `bfa4507d935f17ebfc3d0f00ff7d3c9a4d0e5c18` | CUDA/Ascend TopK 参考实现和契约 |
+| deepinfer-unpacked `main` | `fde5ed766717794470dbccd4d0e2a8bf9b532844` | 社区共读项目的模块导航 |
 
 ## 当时的公开状态
 
@@ -23,6 +24,7 @@ DeepInfer 和 DeepSelect 都处于快速演进阶段。本仓库中的架构判�
 - #202–#206 当时均处于未合并状态；
 - 已有 ROCm 实现主要面向 MI350X/MI355X 的 gfx950；
 - 个人阅读时尚未获得可执行 HIP 验证的硬件环境。
+- `deepinfer-unpacked` 的模块表可以作为阅读导航，代码事实仍以 DeepInfer 固定 commit 为准。
 
 PR 状态变化很快，以上内容只描述快照时点。
 
