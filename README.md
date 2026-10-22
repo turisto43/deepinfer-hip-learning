@@ -16,20 +16,21 @@
 
 ## 从哪里开始
 
-1. [DeepInfer 系统地图](docs/architecture/system-map.md)：先看框架由哪些层组成，以及一次推理大致经过哪些模块。
-2. [后端接缝](docs/architecture/backend-seams.md)：重点看平台发现、构建、算子分派和通信后端如何连接。
-3. [ROCm PR 栈](docs/architecture/rocm-pr-stack.md)：了解现有 #202–#206 已经覆盖什么，以及哪些地方仍需要独立验证。
-4. [环境准备](docs/environment/amd-rocm.md)：查看 ROCm 基础检查、版本记录和最小验证顺序。
-5. [TopK 实验](labs/topk/README.md)：从 DeepSelect 的输入输出契约开始准备最小实验。
-6. [TopK 调用路径](docs/architecture/topk-call-paths.md)：看 indexer、sampler 和 KV cache 索引如何连接。
-7. [学习日志](logs/README.md)：按日期查看实际阅读、命令、失败和修正。
-8. [路线图](ROADMAP.md)：查看当前阶段和下一项可验证产出。
+1. [整体框架与学习路线](docs/learn/01-deepinfer-overview.md)：先建立 DeepInfer 的整体地图和学习顺序。
+2. [理论框架学习](docs/learn/theory/README.md)：按请求、调度、模型、算子和平台分块阅读。
+3. [ROCm 迁移学习](docs/learn/migration/README.md)：从 PR 栈进入具体迁移专题。
+4. [TopK 迁移专题](docs/learn/migration/01-topk-bf16-indexer-prefill.md)：当前进行中的 BF16 indexer prefill 正确性与调用契约验证。
+5. [环境准备](docs/environment/amd-rocm.md)：查看 ROCm 基础检查、版本记录和最小验证顺序。
+6. [学习日志](logs/README.md)：按日期查看实际阅读、命令、失败和修正。
+7. [路线图](ROADMAP.md)：查看当前阶段和下一项可验证产出。
 
 ## 最近更新
 
 **2026-10-22：** 固定 DeepInfer、DeepSelect 和 ROCm PR 栈的参考提交；确认官方已有 ROCm 方案，因此后续以架构阅读、复现和聚焦改进为主，不重复提出泛泛的可行性 RFC。
 
 **2026-10-22：** 完成第一篇源码主线笔记，区分 indexer prefill、indexer decode、candidate block 和 sampler 四类 TopK 调用，并确定优先验证 BF16 indexer 路径。
+
+**2026-10-22：** 调整学习结构：先读整体框架，再分为理论框架和 ROCm 迁移两条路线；TopK 专题归入迁移学习并标记为进行中。
 
 完整时间线见 [日志索引](logs/README.md)。
 
@@ -39,6 +40,7 @@
 
 ```text
 docs/       稳定的架构、环境、术语和上游版本说明
+docs/learn/ 整体框架、理论学习和迁移学习路线
 logs/       按日期记录的学习过程和阶段性结论
 labs/       可执行实验的目标、契约、环境和结果
 upstream/   上游 PR、Issue、评论和贡献记录

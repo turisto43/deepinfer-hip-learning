@@ -67,7 +67,7 @@ DeepInfer 官方仓库已经有一组面向 AMD gfx950 的 ROCm 实现。它被�
 - 当前测试重点集中在 DeepInfer 使用的 BF16 indexer 和 sampler 形状；
 - 正确性和性能数据来自 gfx950 环境，不能直接外推到其他 gfx 架构。
 
-这些差异适合用独立一致性测试固定下来。参考 [TopK 契约](../../labs/topk/contract.md)。
+这些差异适合用独立一致性测试固定下来。当前验证专题见 [PR #204 TopK：BF16 indexer prefill](../learn/migration/01-topk-bf16-indexer-prefill.md)，接口基线见 [TopK 契约](../../labs/topk/contract.md)。
 
 ### #205：MoE、EP、Engram 与 CP
 

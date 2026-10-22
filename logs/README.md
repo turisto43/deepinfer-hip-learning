@@ -7,7 +7,7 @@
 | 日期 | 主题 | 关键结果 |
 | --- | --- | --- |
 | 2026-10-22 | [初始调研](2026-10-22-initial-research.md) | 固定上游版本，确认已有 ROCm PR 栈，确定从架构阅读和 TopK 验证开始 |
-| 2026-10-22 | [TopK 调用路径](2026-10-22-topk-call-path.md) | 区分 indexer、sampler 和逻辑索引转换，确定首个 HIP 实验范围 |
+| 2026-10-22 | [ROCm TopK 迁移学习](2026-10-22-rocm-topk-migration.md) | 把 TopK 专题归入迁移学习，锁定 BF16 indexer prefill 验证范围 |
 
 ## 写法
 

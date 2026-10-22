@@ -1,10 +1,32 @@
-# DeepInfer 中的 TopK 调用路径
+# PR #204 TopK：BF16 Indexer Prefill 正确性与调用契约（进行中）
 
-本文基于 DeepInfer `main@9bd9cf2` 阅读源码，目标是回答一个具体问题：在 DeepInfer 中，`deep_select.topk` 被谁调用、输入输出是什么、HIP 实现需要满足哪些行为。
+本文属于 **ROCm 迁移学习 01**，针对 DeepInfer ROCm PR #204 中的 TopK 实现，验证 BF16 indexer prefill 路径是否正确满足 DeepInfer 的调用契约。
 
-这里描述的是源码阅读结果，不代表已经在 HIP 设备上运行。
+**当前状态：进行中。** 已完成 DeepInfer 调用链和接口参数整理；尚未完成 PR #204 的逐项实现对照、HIP 实机正确性测试和性能测试。
 
-## 先记住结论
+| 检查项 | 状态 | 证据 |
+| --- | --- | --- |
+| DeepInfer indexer prefill 调用点 | 已完成 | `index_attn.py` |
+| BF16 TopK 接口契约 | 已完成 | 本文与 `labs/topk/contract.md` |
+| PR #204 Python 接口逐项对照 | 进行中 | 待继续补充 |
+| PR #204 Triton radix-select 行为核对 | 进行中 | 待继续补充 |
+| HIP 实机正确性 | 未开始 | 尚无测试结果 |
+| Graph 捕获与重复调用 | 未开始 | 尚无测试结果 |
+| 性能 | 未开始 | 尚无测量结果 |
+
+## 专题范围
+
+本专题只负责 BF16 indexer prefill。其他 TopK 路径先作为调用上下文，不在本文提前下结论。
+
+| 路径 | 是否属于本文 | 说明 |
+| --- | --- | --- |
+| BF16 indexer prefill | 是 | 当前正确性与调用契约验证对象 |
+| BF16 indexer decode | 否 | 涉及物理 KV slot，后续单独验证 |
+| Candidate block 两阶段 TopK | 否 | 涉及 block 选择和索引恢复，后续单独验证 |
+| FP32 sampler force-top-k | 否 | dtype、value 输出和映射方式都不同 |
+| FP32 top-logprobs | 否 | 需要按 value 排序 |
+
+## 在整体框架中的位置
 
 DeepInfer 至少有三类 TopK 调用：
 
@@ -14,7 +36,7 @@ DeepInfer 至少有三类 TopK 调用：
 | Sparse indexer decode | BF16 indexer logits | 选出 paged KV cache 中的物理槽位 | `return_value=False`、结果原地转换 |
 | Sampler | FP32 logits/logprobs | 缩小采样空间或返回 top-logprobs | 可能需要 value、可能按 value 排序 |
 
-这三类调用形式相近，但性能瓶颈和边界条件不同。迁移时应先选择一个场景，而不是用一个模糊的“TopK 后端”同时覆盖全部情况。
+这三类调用形式相近，但性能瓶颈和边界条件不同。本文先处理 sparse indexer prefill。
 
 ## 从请求到 TopK
 
@@ -129,6 +151,21 @@ from deep_select.interface import topk
 
 所以在 HIP 迁移中，首先需要确定是复用 vendor 包接口、增加平台 wrapper，还是把 TopK 纳入统一分派。不能只搜索 CUDA 源码并逐行 hipify。
 
+## PR #204 当前对照基线
+
+根据 PR #204 的公开描述和固定 head，当前实现基线与待核查项如下：
+
+| 项目 | 公开方案 | 本文处理状态 |
+| --- | --- | --- |
+| 实现位置 | `vendor/rocm/deep_select/` | 待逐文件对照 |
+| Indexer 算法 | Triton radix-select | 待阅读 `_radix.py` |
+| FP32 采样 | 部分调用 `torch.topk` | 不属于本文主范围 |
+| 目标设备 | gfx950 环境 | 其他设备未验证 |
+| NaN | 公开接口注明不检测 | 待确认是否影响 indexer 契约 |
+| 正确性 | PR 内有 gfx950 测试 | 需核对实际执行和未覆盖场景 |
+
+这部分仍是阅读状态，不能据此断言实现有缺陷。需要先把调用参数与实现细节逐项对齐，再给出结论。
+
 ## HIP 实现要跨过的四层边界
 
 ### 1. Python 接口边界
@@ -147,9 +184,9 @@ TopK 位于模型 forward 和可能的 CUDA/HIP Graph 捕获范围内。实现�
 
 Prefill 索引是压缩 token 的序列位置，decode 输出会在后续转换成 KV cache 物理槽位。测试如果只比较“每行最大的 K 个数”，仍可能漏掉偏移和无效索引处理错误。
 
-## 第一组实验应该怎么选
+## 当前专题验证清单
 
-优先级建议如下：
+本文只完成第一组，其他路径只保留为后续专题：
 
 1. **Indexer prefill 最小用例**
    - BF16；
@@ -174,7 +211,22 @@ Prefill 索引是压缩 token 的序列位置，decode 输出会在后续转换�
    - top-logprobs 路径需要 value 排序；
    - 与前三条路径分开记录。
 
-这套顺序与 DeepInfer 的真实调用比例和失败影响相匹配，也能直接补充到 [TopK 接口契约](../../labs/topk/contract.md)。
+这套顺序与 DeepInfer 的真实调用比例和失败影响相匹配，也能直接补充到 [TopK 接口契约](../../../labs/topk/contract.md)。
+
+需要逐项验证的契约包括：
+
+- [x] 调用点已定位；
+- [x] 输入 dtype 和输出 dtype 已确认；
+- [x] `end`、`output_idx` 和 `output_idx_offset` 的调用方式已记录；
+- [ ] PR #204 的 Python 接口逐参数一致；
+- [ ] 输出对齐要求与 DeepInfer 调用方一致；
+- [ ] 可变长度和不足 `topk` 的填充一致；
+- [ ] `sorted_index=True` 的语义一致；
+- [ ] 无 value 输出路径没有额外计算；
+- [ ] 无隐式设备同步；
+- [ ] 在目标 HIP 环境实际运行；
+- [ ] 对照 `torch.topk` 验证正确性；
+- [ ] 记录性能。
 
 ## deepinfer-unpacked 可以怎样使用
 
@@ -189,14 +241,15 @@ Prefill 索引是压缩 token 的序列位置，decode 输出会在后续转换�
 
 ## 下一步
 
-下一步不是立刻修改 kernel，而是把上面四条调用形态写成独立测试计划，再对照 DeepInfer ROCm PR #204 的实现逐项检查：
+继续补充本专题，先对照 DeepInfer ROCm PR #204 的实现：
 
-- 签名是否一致；
-- 哪些参数被忽略；
-- `end` 和 `output_idx_offset` 是否正确；
-- 是否隐式同步；
-- 测试是否实际执行；
-- FP32 sampler 是否完全不经过新 kernel。
+1. 阅读 `vendor/rocm/deep_select/interface.py` 和 `_radix.py`；
+2. 把每个参数映射到 DeepInfer 的 prefill 调用；
+3. 找出未实现或被忽略的行为；
+4. 把待测项同步到 `labs/topk/contract.md`；
+5. 获得 HIP 环境后先跑最小用例，再跑候选 block 和大形状。
+
+在完成逐项实现对照前，本文保持“进行中”，不把 PR 描述中的测试结果当作个人验证结果。
 
 ## 参考源码
 
@@ -207,4 +260,10 @@ Prefill 索引是压缩 token 的序列位置，decode 输出会在后续转换�
 - [npu_ops/deep_select.py](https://github.com/deepseek-ai/DeepInfer/blob/9bd9cf243fc53ef9afbf8f04d391d989117d6ab9/deepinfer/npu_ops/deep_select.py)
 - [worker.py](https://github.com/deepseek-ai/DeepInfer/blob/9bd9cf243fc53ef9afbf8f04d391d989117d6ab9/deepinfer/worker/worker.py)
 - [model_runner.py](https://github.com/deepseek-ai/DeepInfer/blob/9bd9cf243fc53ef9afbf8f04d391d989117d6ab9/deepinfer/worker/model_runner.py)
+
+## 继续学习
+
+- [ROCm 迁移学习](README.md)
+- [理论框架学习](../theory/README.md)
+- [整体框架与学习路线](../01-deepinfer-overview.md)
 

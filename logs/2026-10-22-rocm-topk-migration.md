@@ -1,8 +1,8 @@
-# 2026-10-22 TopK 调用路径
+# 2026-10-22 ROCm TopK 迁移学习
 
 ## 目标
 
-弄清 DeepInfer 中 TopK 的真实调用位置，以及 HIP 实现首先需要兼容哪一条路径。
+把 TopK 学习笔记归入 ROCm 迁移板块，并锁定 PR #204 中 BF16 indexer prefill 的正确性与调用契约验证。
 
 ## 阅读与参考
 
@@ -34,11 +34,11 @@
 
 ## 结论
 
-首个 HIP 实验应聚焦 BF16 indexer prefill TopK，而不是先做一个通用排序 benchmark。这个路径直接进入 sparse attention，契约包含可变长度、输出复用、对齐和无效索引，覆盖面比单一 `torch.topk` 对比更接近 DeepInfer 的真实需求。
+首个 HIP 实验聚焦 BF16 indexer prefill TopK，而不是先做一个通用排序 benchmark。这个路径直接进入 sparse attention，契约包含可变长度、输出复用、对齐和无效索引，覆盖面比单一 `torch.topk` 对比更接近 DeepInfer 的真实需求。
 
-完整笔记见 [TopK 调用路径](../docs/architecture/topk-call-paths.md)。
+专题笔记当前仍为“进行中”，见 [PR #204 TopK：BF16 indexer prefill](../docs/learn/migration/01-topk-bf16-indexer-prefill.md)。
 
 ## 下一步
 
-把 indexer prefill、indexer decode、candidate block 和 sampler 四条调用形态加入测试矩阵，然后逐项对照 ROCm PR #204。
+逐项对照 ROCm PR #204 的 Python 接口和 Triton radix-select 实现，补齐接口契约、未覆盖行为和 Graph 捕获检查。只有在目标 HIP 环境实际执行后，才补充正确性与性能结果。
 

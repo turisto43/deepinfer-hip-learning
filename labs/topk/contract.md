@@ -26,7 +26,7 @@ DeepInfer `main@9bd9cf2` 至少包含以下形态：
 | Sampler force-top-k | FP32 | `sorted=False`、返回值 | 用 index 映射真实词表 ID |
 | Sampler top-logprobs | FP32 | `sorted=True`、返回值 | 返回 top token 及 logprob |
 
-Indexer 路径直接导入 `deep_select.interface.topk`，不经过 TileLang 算子分派。详细调用链见 [TopK 调用路径](../../docs/architecture/topk-call-paths.md)。
+Indexer 路径直接导入 `deep_select.interface.topk`，不经过 TileLang 算子分派。详细调用链见 [ROCm TopK 迁移专题](../../docs/learn/migration/01-topk-bf16-indexer-prefill.md)。
 
 ## 输入
 
