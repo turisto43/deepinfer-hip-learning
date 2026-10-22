@@ -22,11 +22,16 @@
 - Sampler 路径使用 FP32，可能需要 value，并可能按 value 排序。
 - TopK 直接通过 `deep_select.interface` 导入，不经过 `tilelang_ops/ops.py` 的统一分派。
 - Ascend 使用 import patch 替换 TopK；ROCm PR 使用单独的实现包。
+- PR #204 的 BF16 非排序路径进入 Triton radix-select，supplied output buffer 会原样返回。
+- `end`、offset、填充和升序索引的静态实现与 DeepInfer prefill 调用一致。
+- `abort_when_nan_found` 被忽略，且正 NaN 与负 NaN 在 radix key 中的位置不同。
 
 ## 已本地验证
 
 - 在固定上游源码中定位并交叉核对了上述调用点。
 - 确认 `deepinfer-unpacked` 的模块表可以作为导航，但当前正文仍较少，事实判断以 DeepInfer 源码为准。
+- 对照 PR #204 head `6a80688` 的 `interface.py`、`_radix.py` 和 TopK 测试，完成静态契约对照。
+- 编写 BF16 indexer prefill 验证脚本，并通过 Python 语法检查。
 
 ## 已在 HIP 硬件验证
 
@@ -40,5 +45,5 @@
 
 ## 下一步
 
-逐项对照 ROCm PR #204 的 Python 接口和 Triton radix-select 实现，补齐接口契约、未覆盖行为和 Graph 捕获检查。只有在目标 HIP 环境实际执行后，才补充正确性与性能结果。
+在目标 HIP 环境执行 [验证计划](../labs/topk/test-plan.md)，先跑 smoke 和代表性 prefill 形状，再检查 Graph 捕获。只有在实际执行后，才补充正确性与性能结果。
 

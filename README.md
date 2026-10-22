@@ -32,6 +32,8 @@
 
 **2026-10-22：** 调整学习结构：先读整体框架，再分为理论框架和 ROCm 迁移两条路线；TopK 专题归入迁移学习并标记为进行中。
 
+**2026-10-22：** 完成 PR #204 BF16 indexer prefill 的静态实现对照，并加入可直接在 ROCm 环境运行的正确性与 Graph 验证脚本。
+
 完整时间线见 [日志索引](logs/README.md)。
 
 环境信息可用 [采集脚本](scripts/snapshot-environment.sh) 统一记录。上游 PR 和真实贡献追踪见 [上游追踪](upstream/README.md)。

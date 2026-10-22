@@ -8,8 +8,8 @@
 | --- | --- | --- |
 | DeepInfer indexer prefill 调用点 | 已完成 | `index_attn.py` |
 | BF16 TopK 接口契约 | 已完成 | 本文与 `labs/topk/contract.md` |
-| PR #204 Python 接口逐项对照 | 进行中 | 待继续补充 |
-| PR #204 Triton radix-select 行为核对 | 进行中 | 待继续补充 |
+| PR #204 Python 接口逐项对照 | 已完成静态对照 | `vendor/rocm/deep_select/interface.py` |
+| PR #204 Triton radix-select 行为核对 | 已完成静态对照 | `vendor/rocm/deep_select/_radix.py` |
 | HIP 实机正确性 | 未开始 | 尚无测试结果 |
 | Graph 捕获与重复调用 | 未开始 | 尚无测试结果 |
 | 性能 | 未开始 | 尚无测量结果 |
@@ -151,20 +151,46 @@ from deep_select.interface import topk
 
 所以在 HIP 迁移中，首先需要确定是复用 vendor 包接口、增加平台 wrapper，还是把 TopK 纳入统一分派。不能只搜索 CUDA 源码并逐行 hipify。
 
-## PR #204 当前对照基线
+## PR #204 静态实现对照
 
-根据 PR #204 的公开描述和固定 head，当前实现基线与待核查项如下：
+固定 head：`6a80688d7c74e737d986f87e1522a431565b153a`。
 
-| 项目 | 公开方案 | 本文处理状态 |
+### 接口与调用方式
+
+| 契约项 | DeepInfer prefill 用法 | PR #204 实现 | 静态结论 |
+| --- | --- | --- | --- |
+| 函数签名 | 直接导入 `deep_select.interface.topk` | 与 DeepSelect 参数顺序和默认值一致 | 兼容 |
+| BF16 分派 | `sorted=False`、`sorted_index=True`、`return_value=False` | 进入 Triton radix-select | 兼容 |
+| `end` | `int32`、每行有效长度 | 要求 `int32`、连续、形状 `[rows]`，内核按 `min(end, width)` 读取 | 兼容且更宽松 |
+| 输出缓冲区 | prefill 传入 `topk_index[chunk]` | 使用 `output_idx` 及 row stride，返回同一个对象 | 兼容 |
+| 无效位置 | `idx_oob_fill_value=-1` | 有效元素不足 `topk` 时填充剩余位置 | 兼容 |
+| 索引偏移 | dense prefill 传入 `output_idx_offset=ks` | 仅对有效索引加偏移，不修改填充值 | 兼容 |
+| 升序索引 | `sorted_index=True` | radix emit 按输入行内位置写入 | 符合静态设计 |
+| 不返回 value | `return_value=False` | 不分配 value，也不执行 value store | 兼容 |
+
+PR 的 `test_topk_indices` 使用与 DeepInfer prefill 相同的调用方式，并覆盖可变 `end`、输出缓冲区、偏移和无 value 返回。测试中的检查函数会验证索引范围、重复、top-k 条件和索引顺序。
+
+### 仍需实机确认的行为
+
+| 项目 | 静态观察 | 风险 |
 | --- | --- | --- |
-| 实现位置 | `vendor/rocm/deep_select/` | 待逐文件对照 |
-| Indexer 算法 | Triton radix-select | 待阅读 `_radix.py` |
-| FP32 采样 | 部分调用 `torch.topk` | 不属于本文主范围 |
-| 目标设备 | gfx950 环境 | 其他设备未验证 |
-| NaN | 公开接口注明不检测 | 待确认是否影响 indexer 契约 |
-| 正确性 | PR 内有 gfx950 测试 | 需核对实际执行和未覆盖场景 |
+| Graph 捕获 | 实现没有显式 host sync，PR 描述称可捕获 | 需要验证动态分配、首次编译和重复 replay |
+| 输入对齐 | 声明输入 row stride 需 16B 对齐，但没有运行时断言 | 当前调用方通常对齐，未对齐输入的行为未定义 |
+| 自定义输出对齐 | 自动输出按 32B 对齐；传入缓冲区只检查 shape 和最后一维 stride | DeepInfer 的 `int32`、`topk=512` 输出 row stride 为 2048B，满足要求；其他形状需测试 |
+| 并列值 | radix 在阈值处选择更靠左的并列项 | DeepSelect 契约允许多个合法 top-k 集合，但需要确认 DeepInfer 不依赖具体 subset |
+| NaN 标志 | `abort_when_nan_found` 被忽略 | 与 DeepSelect 的“始终检查 NaN”契约不同 |
+| 正负 NaN | positive NaN 的 key 高于 `+inf`，negative NaN 的 key 低于 `-inf` | PR 文档写“NaN 高于 +inf”，对负 NaN 不准确，也没有对应测试 |
 
-这部分仍是阅读状态，不能据此断言实现有缺陷。需要先把调用参数与实现细节逐项对齐，再给出结论。
+最后一项是通过 radix key 变换静态推导出的行为，仍需在 HIP 环境构造正负 NaN 验证。由于官方 CUDA 契约可能主动终止进程，NaN 探测应作为单独实验运行，不混入普通正确性批处理。
+
+### 静态结论
+
+PR #204 的 BF16 indexer prefill 主路径在参数、输出填充、索引偏移和升序索引方面与 DeepInfer 调用方式一致。当前不能把“静态一致”写成“已经通过”，必须补上：
+
+1. 目标 HIP 设备上的正确性；
+2. Graph 捕获与重复 replay；
+3. 并列值和负 NaN 行为；
+4. 实际测试没有被跳过。
 
 ## HIP 实现要跨过的四层边界
 
@@ -241,13 +267,14 @@ Prefill 索引是压缩 token 的序列位置，decode 输出会在后续转换�
 
 ## 下一步
 
-继续补充本专题，先对照 DeepInfer ROCm PR #204 的实现：
+实现对照已经完成第一轮，下一步是在目标 HIP 环境执行 [首个验证计划](../../../labs/topk/test-plan.md)：
 
-1. 阅读 `vendor/rocm/deep_select/interface.py` 和 `_radix.py`；
-2. 把每个参数映射到 DeepInfer 的 prefill 调用；
-3. 找出未实现或被忽略的行为；
-4. 把待测项同步到 `labs/topk/contract.md`；
-5. 获得 HIP 环境后先跑最小用例，再跑候选 block 和大形状。
+1. 运行 smoke 正确性用例；
+2. 运行代表性 prefill 形状；
+3. 捕获一次 Graph 并在修改 `end` 后重复 replay；
+4. 把环境、命令和结果写入 `labs/topk/results.md`；
+5. 单独探测并列值和正负 NaN；
+6. 在 finite-case 和 Graph 检查完成前，本文继续保持“进行中”。
 
 在完成逐项实现对照前，本文保持“进行中”，不把 PR 描述中的测试结果当作个人验证结果。
 

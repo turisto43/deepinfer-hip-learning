@@ -9,7 +9,7 @@
 | [#201](https://github.com/deepseek-ai/DeepInfer/pull/201) | 一体化 ROCm 实现 | 已关闭 | 已阅读关闭原因 |
 | [#202](https://github.com/deepseek-ai/DeepInfer/pull/202) | 平台与 TileLang HIP | `6ce17ef` | 待逐文件阅读 |
 | [#203](https://github.com/deepseek-ai/DeepInfer/pull/203) | 稠密 GEMM | `36a1457` | 待重点阅读 scale layout |
-| [#204](https://github.com/deepseek-ai/DeepInfer/pull/204) | attention、indexer、TopK | `6a80688` | 当前实验重点 |
+| [#204](https://github.com/deepseek-ai/DeepInfer/pull/204) | attention、indexer、TopK | `6a80688` | TopK 静态对照完成，实机验证待运行 |
 | [#205](https://github.com/deepseek-ai/DeepInfer/pull/205) | MoE、EP、Engram、CP | `6a0c37d` | 待阅读 |
 | [#206](https://github.com/deepseek-ai/DeepInfer/pull/206) | 文档与结果 | `9a0e353` | 待逐项复核 |
 
