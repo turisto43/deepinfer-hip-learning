@@ -8,6 +8,7 @@
 | --- | --- | --- |
 | 2026-10-22 | [初始调研](2026-10-22-initial-research.md) | 固定上游版本，确认已有 ROCm PR 栈，确定从架构阅读和 TopK 验证开始 |
 | 2026-10-22 | [ROCm TopK 迁移学习](2026-10-22-rocm-topk-migration.md) | 把 TopK 专题归入迁移学习，锁定 BF16 indexer prefill 验证范围 |
+| 2026-10-24 | [发布推理主流程笔记](2026-10-24-publish-token-journey.md) | 完成离线路径与生产路径的边界整理，发布理论线第一篇 |
 
 ## 写法
 

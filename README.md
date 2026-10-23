@@ -9,6 +9,7 @@
 | 项目 | 状态 | 证据 |
 | --- | --- | --- |
 | 仓库结构与阅读入口 | 进行中 | 本 README、路线图和日志模板 |
+| 推理主流程学习笔记 | 已发布 | [从“你好”到“好呀”](docs/learn/theory/01-token-journey.md) |
 | DeepInfer 后端架构阅读 | 进行中 | [系统地图](docs/architecture/system-map.md)、[后端接缝](docs/architecture/backend-seams.md) |
 | ROCm PR #202–#206 追踪 | 进行中 | [PR 栈笔记](docs/architecture/rocm-pr-stack.md) |
 | DeepSelect TopK 契约整理 | 进行中 | [TopK 实验档案](labs/topk/README.md) |
@@ -17,12 +18,13 @@
 ## 从哪里开始
 
 1. [整体框架与学习路线](docs/learn/01-deepinfer-overview.md)：先建立 DeepInfer 的整体地图和学习顺序。
-2. [理论框架学习](docs/learn/theory/README.md)：按请求、调度、模型、算子和平台分块阅读。
-3. [ROCm 迁移学习](docs/learn/migration/README.md)：从 PR 栈进入具体迁移专题。
-4. [TopK 迁移专题](docs/learn/migration/01-topk-bf16-indexer-prefill.md)：当前进行中的 BF16 indexer prefill 正确性与调用契约验证。
-5. [环境准备](docs/environment/amd-rocm.md)：查看 ROCm 基础检查、版本记录和最小验证顺序。
-6. [学习日志](logs/README.md)：按日期查看实际阅读、命令、失败和修正。
-7. [路线图](ROADMAP.md)：查看当前阶段和下一项可验证产出。
+2. [从“你好”到“好呀”](docs/learn/theory/01-token-journey.md)：沿着一次请求看 tokenizer、调度、Prefill、Decode 和采样。
+3. [理论框架学习](docs/learn/theory/README.md)：按请求、调度、模型、算子和平台分块阅读。
+4. [ROCm 迁移学习](docs/learn/migration/README.md)：从 PR 栈进入具体迁移专题。
+5. [TopK 迁移专题](docs/learn/migration/01-topk-bf16-indexer-prefill.md)：当前进行中的 BF16 indexer prefill 正确性与调用契约验证。
+6. [环境准备](docs/environment/amd-rocm.md)：查看 ROCm 基础检查、版本记录和最小验证顺序。
+7. [学习日志](logs/README.md)：按日期查看实际阅读、命令、失败和修正。
+8. [路线图](ROADMAP.md)：查看当前阶段和下一项可验证产出。
 
 ## 最近更新
 
@@ -33,6 +35,8 @@
 **2026-10-22：** 调整学习结构：先读整体框架，再分为理论框架和 ROCm 迁移两条路线；TopK 专题归入迁移学习并标记为进行中。
 
 **2026-10-22：** 完成 PR #204 BF16 indexer prefill 的静态实现对照，并加入可直接在 ROCm 环境运行的正确性与 Graph 验证脚本。
+
+**2026-10-24：** 发布第一篇面向初学者的理论笔记，区分 DeepInfer 离线路径与生产服务路径，并整理一次 token 从输入到输出的完整旅程。
 
 完整时间线见 [日志索引](logs/README.md)。
 

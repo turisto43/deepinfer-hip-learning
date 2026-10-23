@@ -10,8 +10,9 @@
 ## 学习顺序
 
 1. [整体框架与学习路线](01-deepinfer-overview.md)
-2. [理论框架学习](theory/README.md)
-3. [ROCm 迁移学习](migration/README.md)
+2. [从“你好”到“好呀”：推理引擎里发生了什么](theory/01-token-journey.md)
+3. [理论框架学习](theory/README.md)
+4. [ROCm 迁移学习](migration/README.md)
 
 理论学习和迁移学习可以交替进行，但每次迁移实验都应能回到一个明确的框架位置。
 
